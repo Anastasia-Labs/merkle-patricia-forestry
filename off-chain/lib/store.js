@@ -1,25 +1,25 @@
-import assert from "node:assert";
-import { Level } from "level";
-import { NULL_HASH } from "./helpers.js";
-import pg from "pg";
+import assert from 'node:assert';
+import { Level } from 'level';
+import { NULL_HASH } from './helpers.js';
+import pg from 'pg';
 
 export class Store {
   #batch;
   #db;
 
   constructor(dbType, options) {
-    if (dbType === "memory") {
+    if (dbType === 'memory') {
       this.#db = inMemoryMap();
-    } else if (dbType === "level" && options) {
+    } else if (dbType === 'level' && options) {
       try {
-        this.#db = new Level(options.filename, { valueEncoding: "json" });
+        this.#db = new Level(options.filename, { valueEncoding: 'json' });
       } catch (e) {
         throw e;
       }
-    } else if (dbType === "pg" && options) {
+    } else if (dbType === 'pg' && options) {
       this.#db = pgMap();
     } else {
-      throw new Error("unrecognized db type or missing options");
+      throw new Error('unrecognized db type or missing options');
     }
   }
 
@@ -28,7 +28,7 @@ export class Store {
   }
 
   async batch(callback) {
-    assert(this.#batch === undefined, "batch already ongoing");
+    assert(this.#batch === undefined, 'batch already ongoing');
 
     this.#batch = [];
 
@@ -50,26 +50,26 @@ export class Store {
   async get(key, deserialise) {
     return deserialise(
       key,
-      await this.#db.get((key ?? NULL_HASH).toString("hex")),
+      await this.#db.get((key ?? NULL_HASH).toString('hex')),
       this
     );
   }
 
   async put(key, value) {
-    (key = (key ?? NULL_HASH).toString("hex")), (value = value.serialise());
+    (key = (key ?? NULL_HASH).toString('hex')), (value = value.serialise());
 
     if (this.#batch !== undefined) {
-      this.#batch.push({ type: "put", key, value });
+      this.#batch.push({ type: 'put', key, value });
     } else {
       this.#db.put(key, value);
     }
   }
 
   async del(key) {
-    key = (key ?? NULL_HASH).toString("hex");
+    key = (key ?? NULL_HASH).toString('hex');
 
     if (this.#batch !== undefined) {
-      this.#batch.push({ type: "del", key });
+      this.#batch.push({ type: 'del', key });
     } else {
       this.#db.del(key);
     }
@@ -124,24 +124,26 @@ CREATE TABLE IF NOT EXISTS ${tableName} (
     PRIMARY KEY (key)
   );`;
   } else {
-    throw new Error("invalid table name");
+    throw new Error('invalid table name');
   }
 }
 
 async function pgMap(options) {
   const t = options.tableName;
+
+  const db = new pg.Pool({
+    host: options.host,
+    user: options.user,
+    password: options.password,
+    database: options.database,
+    max: options.max,
+    idleTimeoutMillis: options.idleTimeoutMillis,
+    connectionTimeoutMillis: options.connectionTimeoutMillis,
+  });
+
   return {
     async open() {
       try {
-        const db = new pg.Pool({
-          host: options.host,
-          user: options.user,
-          password: options.password,
-          database: options.database,
-          max: options.max,
-          idleTimeoutMillis: options.idleTimeoutMillis,
-          connectionTimeoutMillis: options.connectionTimeoutMillis,
-        });
         await db.query(createTableQuery(t));
       } catch (e) {
         throw e;
@@ -167,11 +169,18 @@ async function pgMap(options) {
     },
 
     async batch(ops) {
-      await db.query("BEGIN");
-      for (const { type, key, value } of ops) {
-        await this[type](key, value);
+      try {
+        await db.query('BEGIN');
+        for (const { type, key, value } of ops) {
+          await this[type](key, value);
+        }
+        await db.query('COMMIT');
+      } catch(e) {
+        await db.query('ROLLBACK');
+        throw e;
+      } finally {
+        db.release();
       }
-      await db.query("COMMIT");
     },
 
     async size() {
