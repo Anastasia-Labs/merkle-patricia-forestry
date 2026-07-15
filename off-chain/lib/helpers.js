@@ -104,11 +104,14 @@ export function commonPrefix(words) {
  */
 export function assertInstanceOf(instance, what, fn) {
   for (let key in what) {
+    const matches = fn ? fn(what[key], instance) : what[key] instanceof instance;
+    if (matches) continue;
+
     const expected = instance?.prototype?.constructor?.name || instance;
     const got = what[key]?.prototype?.constructor?.name || typeof what[key];
 
     assert(
-      fn ? fn(what[key], instance) : what[key] instanceof instance,
+      false,
       `${key} must be an instance of ${expected} but is ${got}: ${inspect(what[key])}`
     );
   }

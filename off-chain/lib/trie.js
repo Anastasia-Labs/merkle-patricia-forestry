@@ -39,6 +39,112 @@ const PREFIX_CUTOFF = 8; // # of nibbles
  */
 const ROOT_KEY = '__root__';
 
+const midgardBranchHashDiagnostics = {
+  initializations: 0,
+  initializationHashes: 0,
+  initializationMs: 0,
+  incrementalUpdates: 0,
+  incrementalHashes: 0,
+  incrementalMs: 0,
+  rebuilds: 0,
+  rebuildHashes: 0,
+  rebuildMs: 0,
+};
+
+let midgardBranchHashDiagnosticsEnabled = false;
+const midgardMutationProofs = new WeakSet();
+const midgardMutationArenaOwners = new WeakMap();
+
+function retainMidgardMutation(node) {
+  const arenaToken = node.store.midgardTransientArenaToken;
+  if (arenaToken !== undefined && midgardMutationArenaOwners.get(node) === arenaToken) {
+    return;
+  }
+
+  midgardMutationProofs.add(node);
+  node.store.putRetainedNode(node.hash, node);
+  if (arenaToken !== undefined) midgardMutationArenaOwners.set(node, arenaToken);
+}
+
+function resetMidgardBranchHashDiagnostics() {
+  for (const key of Object.keys(midgardBranchHashDiagnostics)) {
+    midgardBranchHashDiagnostics[key] = 0;
+  }
+}
+
+function readMidgardBranchHashDiagnostics() {
+  return { ...midgardBranchHashDiagnostics };
+}
+
+function cachedBranchMerkleRoot(branch) {
+  const diagnosticsEnabled = midgardBranchHashDiagnosticsEnabled;
+  const startedAt = diagnosticsEnabled ? performance.now() : 0;
+  const nodes = branch.__midgardMerkleNodes ?? Array(32);
+  const hadRoot = nodes[1] !== undefined;
+  const dirtyChild = branch.__midgardDirtyChild;
+
+  if (nodes[1] !== undefined && dirtyChild !== undefined) {
+    let index = 16 + dirtyChild;
+    let hashes = 0;
+    nodes[index] = branch.children[dirtyChild]?.hash ?? NULL_HASH;
+
+    while (index > 1) {
+      index >>= 1;
+      nodes[index] = digest(Buffer.concat([nodes[2 * index], nodes[2 * index + 1]]));
+      if (diagnosticsEnabled) hashes += 1;
+    }
+
+    branch.__midgardDirtyChild = undefined;
+    if (diagnosticsEnabled) {
+      midgardBranchHashDiagnostics.incrementalUpdates += 1;
+      midgardBranchHashDiagnostics.incrementalHashes += hashes;
+      midgardBranchHashDiagnostics.incrementalMs += performance.now() - startedAt;
+    }
+    branch.__midgardMerkleAuthenticated = true;
+    return nodes[1];
+  }
+
+  let dirty = new Set();
+  for (let index = 0; index < 16; index += 1) {
+    const hash = branch.children[index]?.hash ?? NULL_HASH;
+    const nodeIndex = 16 + index;
+    if (nodes[nodeIndex] === undefined || !nodes[nodeIndex].equals(hash)) {
+      nodes[nodeIndex] = hash;
+      dirty.add(nodeIndex >> 1);
+    }
+  }
+
+  while (dirty.size > 0) {
+    const parents = new Set();
+    for (const index of dirty) {
+      nodes[index] = digest(Buffer.concat([nodes[2 * index], nodes[2 * index + 1]]));
+      if (diagnosticsEnabled) {
+        midgardBranchHashDiagnostics[
+          hadRoot ? 'rebuildHashes' : 'initializationHashes'
+        ] += 1;
+      }
+      if (index > 1) parents.add(index >> 1);
+    }
+    dirty = parents;
+  }
+
+  branch.__midgardMerkleNodes = nodes;
+  branch.__midgardDirtyChild = undefined;
+  branch.__midgardMerkleAuthenticated = true;
+  if (diagnosticsEnabled) {
+    const elapsedMs = performance.now() - startedAt;
+    if (hadRoot) {
+      midgardBranchHashDiagnostics.rebuilds += 1;
+      midgardBranchHashDiagnostics.rebuildMs += elapsedMs;
+    } else {
+      midgardBranchHashDiagnostics.initializations += 1;
+      midgardBranchHashDiagnostics.initializationMs += elapsedMs;
+    }
+  }
+
+  return nodes[1];
+}
+
 // -----------------------------------------------------------------------------
 // ------------------------------------------------------------------------ Trie
 // -----------------------------------------------------------------------------
@@ -51,6 +157,59 @@ const ROOT_KEY = '__root__';
  *  {@link Trie}.
  */
 export class Trie {
+  static enableMidgardBranchHashDiagnostics(enabled = true) {
+    midgardBranchHashDiagnosticsEnabled = enabled;
+  }
+
+  static resetMidgardBranchHashDiagnostics() {
+    resetMidgardBranchHashDiagnostics();
+  }
+
+  static midgardBranchHashDiagnostics() {
+    return readMidgardBranchHashDiagnostics();
+  }
+
+  consumeMidgardMutationProof() {
+    return midgardMutationProofs.delete(this);
+  }
+
+  finalizeMidgardEventMutation() {
+    const dirtyNodes = new Set(this.store.takeMidgardDirtyNodes());
+    if (dirtyNodes.size === 0) return this;
+    if (!dirtyNodes.has(this)) {
+      throw new Error('Midgard event mutation did not retain its dirty root');
+    }
+
+    const finalized = new Set();
+    const finalize = (node) => {
+      if (finalized.has(node) || !dirtyNodes.has(node)) return;
+
+      if (node instanceof Branch) {
+        for (const child of node.children) {
+          if (child instanceof Trie) finalize(child);
+        }
+
+        // An event may dirty more than one child. Force the cache's multi-leaf
+        // comparison path instead of consuming only the last dirty nibble.
+        node.__midgardDirtyChild = undefined;
+        node.hash = Branch.computeHash(node.prefix, cachedBranchMerkleRoot(node));
+      } else if (node instanceof Leaf) {
+        node.hash = Leaf.computeHash(node.prefix, digest(node.value));
+      } else {
+        node.hash = null;
+      }
+
+      finalized.add(node);
+      if (typeof node.serialise === 'function' && node.hash !== null) {
+        retainMidgardMutation(node);
+      }
+    };
+
+    finalize(this);
+    this.store.putRetainedRoot(this.hash ?? NULL_HASH);
+    return this;
+  }
+
   /** The root hash of the trie.
    *
    * @type {Buffer}
@@ -133,6 +292,26 @@ export class Trie {
    * @private
    */
   async save(previousHash) {
+    if (this.store.synchronousRetainedWrites === true) {
+      if (this.store.deferMidgardBranchHashes === true) {
+        this.store.recordMidgardDirtyNode(this);
+        return this;
+      }
+
+      if (
+        previousHash !== undefined &&
+        this.store.midgardTransientArenaToken === undefined
+      ) {
+        this.store.deleteRetainedNode(previousHash);
+      }
+
+      if (this.isRoot) {
+        this.store.putRetainedRoot(this.hash ?? NULL_HASH);
+      }
+
+      return this;
+    }
+
     if (previousHash !== undefined) {
       await this.store.del(previousHash);
     }
@@ -186,11 +365,6 @@ export class Trie {
 
       // ------------------- A branch node
 
-      // Remove the prefix from all children.
-      const stripped = keyValues.map(kv => {
-        return { ...kv, path: kv.path.slice(prefix.length) };
-      });
-
       // Construct sub-tries recursively, for each remainining digits.
       //
       // NOTE(1): We have just deleted the common prefix from all children,
@@ -201,17 +375,20 @@ export class Trie {
       // NOTE(2): Because we have at least 2 values at this point, the
       // resulting Branch is guaranted to have at least 2 children. They cannot
       // be under the same branch since we have stripped their common prefix!
-      const nodes = await Promise.all(Array
-        .from('0123456789abcdef')
-        .map(digit => loop(digit, stripped.reduce((acc, kv) => {
-          assert(kv.path[0] !== undefined, `empty path for node ${kv}`);
+      const digits = '0123456789abcdef';
+      const buckets = Array.from({ length: 16 }, () => []);
+      for (const kv of keyValues) {
+        const path = kv.path.slice(prefix.length);
+        assert(path[0] !== undefined, `empty path for node ${kv}`);
+        buckets[Number.parseInt(path[0], 16)].push({
+          ...kv,
+          path: path.slice(1),
+        });
+      }
 
-          if (kv.path[0] === digit) {
-            acc.push({ ...kv, path: kv.path.slice(1) });
-          }
-
-          return acc;
-        }, []))));
+      const nodes = await Promise.all(
+        buckets.map((bucket, index) => loop(digits[index], bucket))
+      );
 
       const children = nodes.map(trie => trie.isEmpty() ? undefined : trie);
 
@@ -290,6 +467,28 @@ export class Trie {
 
     self.isRoot = isRoot;
 
+    if (store.synchronousRetainedWrites === true) {
+      if (store.deferMidgardBranchHashes === true) {
+        midgardMutationArenaOwners.delete(self);
+        store.recordMidgardDirtyNode(self);
+        return self;
+      }
+
+      if (self.hash !== null && typeof self.serialise === 'function') {
+        midgardMutationArenaOwners.delete(self);
+        retainMidgardMutation(self);
+      }
+
+      if (
+        previousHash !== undefined &&
+        store.midgardTransientArenaToken === undefined
+      ) {
+        store.deleteRetainedNode(previousHash);
+      }
+      if (isRoot) store.putRetainedRoot(self.hash ?? NULL_HASH);
+      return self;
+    }
+
     return self.save(previousHash);
   }
 
@@ -316,19 +515,347 @@ export class Trie {
         return trie.prefix.startsWith(path.slice(ix)) ? trie : undefined;
       }
 
-      const child = trie.children[nibble(path[ix + trie.prefix.length])];
+      const childIndex = nibble(path[ix + trie.prefix.length]);
+      let child = trie.children[childIndex];
 
       if (child === undefined) {
         return undefined;
       }
 
+      if (!(child instanceof Trie)) {
+        child = await this.store.get(child.hash, Trie.deserialise);
+        if (this.store.retainHydratedChildren === true) {
+          trie.children[childIndex] = child;
+        }
+      }
+
       return loop(
-        this.store.get(child.hash, Trie.deserialise),
+        Promise.resolve(child),
         ix + trie.prefix.length + 1,
       )
     };
 
     return loop(Promise.resolve(this), 0);
+  }
+
+  /** Return a structurally detached node backed by the requested store. */
+  cloneDetached(store = this.store) {
+    const hash = Buffer.from(this.hash ?? NULL_HASH);
+    if (this instanceof Leaf) {
+      return new Leaf(
+        hash,
+        this.prefix,
+        Buffer.from(this.key),
+        Buffer.from(this.value),
+        store,
+      );
+    }
+
+    if (this instanceof Branch) {
+      const detached = new Branch(
+        hash,
+        this.prefix,
+        this.children.map(child => child === undefined
+          ? undefined
+          : { hash: Buffer.from(child.hash) }
+        ),
+        this.size,
+        store,
+      );
+
+      if (
+        this.__midgardMerkleAuthenticated === true &&
+        Array.isArray(this.__midgardMerkleNodes)
+      ) {
+        // Cache slots are replaced, never mutated in place. A distinct array
+        // isolates future updates while safely sharing immutable digests.
+        detached.__midgardMerkleNodes = this.__midgardMerkleNodes.slice();
+        detached.__midgardMerkleAuthenticated = true;
+      }
+
+      return detached;
+    }
+
+    return new Trie(store, hash, this.prefix, this.size);
+  }
+
+  /** Verify every currently hydrated node through a bounded depth against its
+   * content-addressed hash. No child is loaded by this operation. */
+  assertHydratedNodeHashes(maxDepth = 2) {
+    const boundedDepth = Math.max(0, Math.min(64, Math.floor(maxDepth)));
+    let verifiedNodes = 0;
+
+    const loop = (node, depth) => {
+      let expectedHash;
+      if (node instanceof Leaf) {
+        expectedHash = Leaf.computeHash(node.prefix, digest(node.value));
+      } else if (node instanceof Branch) {
+        const cachedNodes = node.__midgardMerkleNodes;
+        if (
+          node.__midgardMerkleAuthenticated === true &&
+          Array.isArray(cachedNodes) &&
+          cachedNodes[1] !== undefined
+        ) {
+          for (let index = 0; index < 16; index += 1) {
+            const expectedLeaf = node.children[index]?.hash ?? NULL_HASH;
+            const cachedLeaf = cachedNodes[16 + index];
+            if (cachedLeaf === undefined || !cachedLeaf.equals(expectedLeaf)) {
+              throw new Error(
+                `hydrated node merkle cache mismatch at child ${index}`
+              );
+            }
+          }
+          expectedHash = Branch.computeHash(node.prefix, cachedNodes[1]);
+        } else {
+          node.__midgardMerkleNodes = undefined;
+          node.__midgardDirtyChild = undefined;
+          node.__midgardMerkleAuthenticated = false;
+          expectedHash = Branch.computeHash(
+            node.prefix,
+            cachedBranchMerkleRoot(node),
+          );
+        }
+      } else {
+        expectedHash = node.hash ?? NULL_HASH;
+      }
+
+      if (!(node.hash ?? NULL_HASH).equals(expectedHash)) {
+        throw new Error(
+          `hydrated node hash mismatch: expected=${expectedHash.toString('hex')},` +
+          `actual=${(node.hash ?? NULL_HASH).toString('hex')}`
+        );
+      }
+
+      verifiedNodes += 1;
+      if (depth >= boundedDepth || !(node instanceof Branch)) return;
+      for (const child of node.children) {
+        if (child instanceof Trie) loop(child, depth + 1);
+      }
+    };
+
+    loop(this, 0);
+    return { verifiedNodes };
+  }
+
+  /** Collapse hydrated descendants below a bounded upper arena back to their
+   * immutable content-addressed references. */
+  collapseHydratedChildren(retainDepth = 2) {
+    const boundedDepth = Math.max(0, Math.min(8, Math.floor(retainDepth)));
+    let retainedNodes = 0;
+    let collapsedNodes = 0;
+
+    const countHydrated = (node) => {
+      let count = 1;
+      if (node instanceof Branch) {
+        for (const child of node.children) {
+          if (child instanceof Trie) count += countHydrated(child);
+        }
+      }
+      return count;
+    };
+
+    const loop = (node, depth) => {
+      retainedNodes += 1;
+      if (!(node instanceof Branch)) return;
+
+      for (let index = 0; index < node.children.length; index += 1) {
+        const child = node.children[index];
+        if (!(child instanceof Trie)) continue;
+
+        if (depth >= boundedDepth) {
+          collapsedNodes += countHydrated(child);
+          node.children[index] = { hash: Buffer.from(child.hash) };
+        } else {
+          loop(child, depth + 1);
+        }
+      }
+    };
+
+    loop(this, 0);
+    return { retainedNodes, collapsedNodes };
+  }
+
+  /**
+   * Hydrate the union of exact touched paths with bounded store reads.
+   *
+   * Delete paths additionally hydrate the possible surviving sibling needed
+   * to collapse a branch after deletion.
+   *
+   * @param {Array<Buffer|string|{key: Buffer|string, type?: string}>} touched
+   * @param {{ concurrency?: number, nativeBatchSize?: number }} [options]
+   * @return {Promise<object>}
+   */
+  async hydratePaths(touched, options = {}) {
+    const concurrency = Math.max(
+      1,
+      Math.min(256, Math.floor(options.concurrency ?? 64)),
+    );
+    const nativeBatchSize = Math.max(
+      1,
+      Math.min(4096, Math.floor(options.nativeBatchSize ?? 4096)),
+    );
+
+    const uniqueByPath = new Map();
+    for (const item of touched) {
+      const directKey = Buffer.isBuffer(item) || typeof item === 'string';
+      const key = directKey ? item : item.key;
+      const path = intoPath(key);
+      const previous = uniqueByPath.get(path);
+      uniqueByPath.set(path, {
+        path,
+        deletePath:
+          (previous?.deletePath ?? false) || (!directKey && item.type === 'delete'),
+      });
+    }
+
+    const uniquePaths = [...uniqueByPath.values()];
+    let frontier = [{
+      node: this,
+      states: uniquePaths.map(state => ({ ...state, ix: 0 })),
+    }];
+    let nodesRequested = 0;
+    let hydrationHits = 0;
+    let hydrationMisses = 0;
+    let loadedNodes = 0;
+    let maxInFlight = 0;
+    let maxBatchKeys = 0;
+    let maxFrontierPaths = uniquePaths.length;
+    let retainedBytesEstimate = 0;
+
+    while (frontier.length > 0) {
+      const requests = [];
+      const next = [];
+
+      for (const { node, states } of frontier) {
+        if (!(node instanceof Branch)) continue;
+
+        const groups = new Map();
+        const deleteTargetChildIndexes = new Set();
+        for (const state of states) {
+          if (!state.path.slice(state.ix).startsWith(node.prefix)) continue;
+
+          const childIndex = nibble(
+            state.path[state.ix + node.prefix.length]
+          );
+          if (state.deletePath) deleteTargetChildIndexes.add(childIndex);
+
+          const group = groups.get(childIndex);
+          if (group === undefined) groups.set(childIndex, [state]);
+          else group.push(state);
+        }
+
+        const nonEmptyChildIndexes = node.children.flatMap(
+          (child, childIndex) => child === undefined ? [] : [childIndex]
+        );
+
+        // A delete only loads an otherwise-untouched sibling when the targeted
+        // children could reduce this branch to one survivor. That survivor's
+        // prefix and body are required to collapse the branch.
+        const targetedExistingChildren = [...deleteTargetChildIndexes].filter(
+          childIndex => node.children[childIndex] !== undefined
+        ).length;
+        if (
+          targetedExistingChildren > 0 &&
+          nonEmptyChildIndexes.length - targetedExistingChildren <= 1
+        ) {
+          for (const siblingIndex of nonEmptyChildIndexes) {
+            if (!groups.has(siblingIndex)) groups.set(siblingIndex, []);
+          }
+        }
+
+        for (const [childIndex, childStates] of groups) {
+          const child = node.children[childIndex];
+          if (child === undefined) {
+            hydrationMisses += 1;
+            continue;
+          }
+
+          nodesRequested += 1;
+          const nextStates = childStates.map(state => ({
+            path: state.path,
+            deletePath: state.deletePath,
+            ix: state.ix + node.prefix.length + 1,
+          }));
+
+          if (child instanceof Trie) {
+            hydrationHits += 1;
+            if (nextStates.length > 0) next.push({ node: child, states: nextStates });
+            continue;
+          }
+
+          requests.push({ node, childIndex, child, nextStates });
+        }
+      }
+
+      const attachLoaded = (batch, loaded) => {
+        for (let index = 0; index < loaded.length; index += 1) {
+          const request = batch[index];
+          const child = loaded[index];
+          if (typeof child.store.authenticateHydratedNodeOnce === 'function') {
+            child.store.authenticateHydratedNodeOnce(child);
+          } else {
+            child.assertHydratedNodeHashes(0);
+          }
+
+          request.node.children[request.childIndex] = child;
+          loadedNodes += 1;
+          retainedBytesEstimate += child instanceof Leaf
+            ? 256 + child.key.length + child.value.length
+            : 2048;
+          if (request.nextStates.length > 0) {
+            next.push({ node: child, states: request.nextStates });
+          }
+        }
+      };
+
+      const nativeStore = requests[0]?.node.store;
+      const canBatch =
+        nativeStore !== undefined &&
+        typeof nativeStore.getMany === 'function' &&
+        requests.every(({ node }) => node.store === nativeStore);
+
+      if (canBatch) {
+        for (let offset = 0; offset < requests.length; offset += nativeBatchSize) {
+          const batch = requests.slice(offset, offset + nativeBatchSize);
+          maxInFlight = Math.max(maxInFlight, batch.length);
+          maxBatchKeys = Math.max(maxBatchKeys, batch.length);
+          const loaded = await nativeStore.getMany(
+            batch.map(({ child }) => child.hash),
+            Trie.deserialise,
+          );
+          attachLoaded(batch, loaded);
+        }
+      } else {
+        for (let offset = 0; offset < requests.length; offset += concurrency) {
+          const batch = requests.slice(offset, offset + concurrency);
+          maxInFlight = Math.max(maxInFlight, batch.length);
+          const loaded = await Promise.all(
+            batch.map(({ node, child }) =>
+              node.store.get(child.hash, Trie.deserialise)
+            )
+          );
+          attachLoaded(batch, loaded);
+        }
+      }
+
+      frontier = next;
+      maxFrontierPaths = Math.max(
+        maxFrontierPaths,
+        frontier.reduce((total, item) => total + item.states.length, 0),
+      );
+    }
+
+    return {
+      uniquePaths: uniquePaths.length,
+      nodesRequested,
+      hydrationHits,
+      hydrationMisses,
+      loadedNodes,
+      maxInFlight,
+      maxBatchKeys,
+      maxFrontierPaths,
+      retainedBytesEstimate,
+    };
   }
 
   /**
@@ -442,6 +969,18 @@ export class Trie {
    * @private
    */
   static async deserialise(hash, blob, store) {
+    if (blob instanceof Trie) {
+      const expectedHash = Buffer.from(hash ?? NULL_HASH);
+      const actualHash = Buffer.from(blob.hash ?? NULL_HASH);
+      if (!actualHash.equals(expectedHash)) {
+        throw new Error(
+          `live arena node hash mismatch: expected=${expectedHash.toString('hex')},` +
+          `actual=${actualHash.toString('hex')}`
+        );
+      }
+      return blob.cloneDetached(store);
+    }
+
     switch (blob?.__kind) {
       case 'Leaf':
         return Leaf.deserialise(hash, blob, store);
@@ -571,7 +1110,15 @@ export class Leaf extends Trie {
    */
   async save(previousHash) {
     this.hash = Leaf.computeHash(this.prefix, digest(this.value));
-    await this.store.put(this.hash, this);
+    if (this.store.synchronousRetainedWrites === true) {
+      if (this.store.deferMidgardBranchHashes === true) {
+        this.store.recordMidgardDirtyNode(this);
+        return this;
+      }
+      retainMidgardMutation(this);
+    } else {
+      await this.store.put(this.hash, this);
+    }
     return super.save(previousHash);
   }
 
@@ -768,7 +1315,7 @@ export class Branch extends Trie {
    * @return {Promise<Branch>}
    * @private
    */
-  static async from(prefix, children, store) {
+  static async from(prefix, children, store, sizeOverride) {
     assert(children !== undefined);
 
     children = !Array.isArray(children)
@@ -785,12 +1332,18 @@ export class Branch extends Trie {
     // should be.
     children.forEach((node, ix) => {
       if (node !== undefined) {
-        assertInstanceOf(Trie, { [`children[${ix}]`]: node });
-
-        assert(
-          !node.isEmpty(),
-          `Branch cannot contain empty tries; but children[${ix}] is empty.`
-        );
+        if (sizeOverride === undefined) {
+          assertInstanceOf(Trie, { [`children[${ix}]`]: node });
+          assert(
+            !node.isEmpty(),
+            `Branch cannot contain empty tries; but children[${ix}] is empty.`
+          );
+        } else {
+          assert(
+            Buffer.isBuffer(node.hash),
+            `children[${ix}] must carry a hash`,
+          );
+        }
       }
     });
 
@@ -806,7 +1359,10 @@ export class Branch extends Trie {
       'children must be a vector of *exactly 16* elements (possibly undefined)',
     );
 
-    const size = children.reduce((size, child) => size + (child?.size || 0), 0);
+    const size = sizeOverride ?? children.reduce(
+      (size, child) => size + (child?.size || 0),
+      0,
+    );
 
     const branch = new Branch(
       Branch.computeHash(prefix, merkleRoot(children)),
@@ -854,7 +1410,10 @@ export class Branch extends Trie {
    */
   async insert(key, value) {
     try {
-      return await this.store.batch(() => tryInsert(this, key, value));
+      const mutation = async () => tryInsert(this, key, value);
+      return this.store.synchronousRetainedWrites === true
+        ? mutation()
+        : await this.store.batch(mutation);
     } catch(e) {
       // Ensures that children aren't kept in-memory when an insertion failed.
       await this.save();
@@ -877,7 +1436,10 @@ export class Branch extends Trie {
    */
   async delete(key) {
     try {
-      return await this.store.batch(() => tryDelete(this, key))
+      const mutation = async () => tryDelete(this, key);
+      return this.store.synchronousRetainedWrites === true
+        ? mutation()
+        : await this.store.batch(mutation);
     } catch(e) {
       // Ensures that children aren't kept in-memory when an deletion failed.
       await this.save();
@@ -994,14 +1556,33 @@ export class Branch extends Trie {
    * @private
    */
   async save(previousHash) {
-    this.hash = Branch.computeHash(this.prefix, merkleRoot(this.children));
+    if (
+      this.store.synchronousRetainedWrites === true &&
+      this.store.deferMidgardBranchHashes === true
+    ) {
+      this.store.recordMidgardDirtyNode(this);
+      return this;
+    }
 
-    this.children = this.children.map(child => child instanceof Trie
-      ? { hash: child.hash }
-      : child
+    this.hash = Branch.computeHash(
+      this.prefix,
+      this.store.retainHydratedChildren === true
+        ? cachedBranchMerkleRoot(this)
+        : merkleRoot(this.children),
     );
 
-    await this.store.put(this.hash, this);
+    if (this.store.retainHydratedChildren !== true) {
+      this.children = this.children.map(child => child instanceof Trie
+        ? { hash: child.hash }
+        : child
+      );
+    }
+
+    if (this.store.synchronousRetainedWrites === true) {
+      retainMidgardMutation(this);
+    } else {
+      await this.store.put(this.hash, this);
+    }
 
     return super.save(previousHash);
   }
@@ -1018,7 +1599,9 @@ export class Branch extends Trie {
     return callback(await Promise.all(this.children.map(child =>
       child === undefined
         ? child
-        : this.store.get(child.hash, Trie.deserialise)
+        : child instanceof Trie && this.store.retainHydratedChildren === true
+          ? child
+          : this.store.get(child.hash, Trie.deserialise)
     )));
   }
 
@@ -1240,7 +1823,7 @@ export class Proof {
    *   Returns null when the resulting hash is an empty trie (e.g. when
    *   checking an empty proof in exclusion).
    */
-  verify(includingItem = true, key) {
+  verify(includingItem = true) {
     assert(
       !(includingItem && this.#value === undefined),
       "attempted to verify an inclusion proof without value: use 'proof.setValue(..)', or build a new proof."
@@ -1620,8 +2203,6 @@ async function tryInsert(self, key, value) {
 
     const thisNibble = nibble(path[0]);
 
-    await node.fetchChildren();
-
     if (prefix.length < node.prefix.length) {
       const newPrefix = node.prefix.slice(prefix.length);
       const newNibble = nibble(newPrefix[0]);
@@ -1639,6 +2220,7 @@ async function tryInsert(self, key, value) {
           node.prefix.slice(prefix.length + 1),
           node.children,
           self.store,
+          node.size,
         ),
       });
 
@@ -1646,8 +2228,15 @@ async function tryInsert(self, key, value) {
     }
 
     parents.unshift(node);
+    if (node.store.retainHydratedChildren === true) {
+      node.__midgardDirtyChild = thisNibble;
+    }
 
-    const child = node.children[thisNibble];
+    let child = node.children[thisNibble];
+    if (child !== undefined && !(child instanceof Trie)) {
+      child = await node.store.get(child.hash, Trie.deserialise);
+      node.children[thisNibble] = child;
+    }
 
     if (child === undefined) {
       node.children[thisNibble] = await Leaf.from(
@@ -1669,11 +2258,10 @@ async function tryInsert(self, key, value) {
 
   const parents = await loop(self, intoPath(key), []);
 
-  await parents.reduce(async (task, node) => {
-    await task;
+  for (const node of parents) {
     node.size += 1;
-    return node.save(node.hash);
-  }, Promise.resolve());
+    await node.save(node.hash);
+  }
 
   return self;
 }
@@ -1710,15 +2298,25 @@ async function tryDelete(self, key) {
       return undefined;
     }
 
-    await self.store.del(node.hash);
+    if (self.store.synchronousRetainedWrites === true) {
+      self.store.deleteRetainedNode(node.hash);
+    } else {
+      await self.store.del(node.hash);
+    }
 
     const cursor = node.prefix.length;
 
     const thisNibble = nibble(path[cursor]);
 
-    await node.fetchChildren();
-
-    const child = await node.children[thisNibble];
+    const childReference = node.children[thisNibble];
+    const child = childReference instanceof Trie
+      ? childReference
+      : childReference === undefined
+        ? undefined
+        : await node.store.get(childReference.hash, Trie.deserialise);
+    if (child === undefined) {
+      throw new Error(`element at remaining path ${path} not in trie`);
+    }
 
     // NOTE: 'loop' returns 'undefined' when the child is a leaf, which means
     // we've reached the end of the trie. So that node gets effectively deleted.
@@ -1726,6 +2324,9 @@ async function tryDelete(self, key) {
     // Then, because we call _loop_ before doing any further modification, we can
     // continue knowing that children have already been updated.
     node.children[thisNibble] = await loop(child, path.slice(cursor + 1));
+    if (node.store.retainHydratedChildren === true) {
+      node.__midgardDirtyChild = thisNibble;
+    }
 
     node.size -= 1;
 
@@ -1736,7 +2337,10 @@ async function tryDelete(self, key) {
     // with ourself while preserving its stucture for the child may be a Leaf or
     // another Branch node.
     if (neighbors.length === 1) {
-      const [neighbor, neighborNibble] = neighbors[0];
+      let [neighbor, neighborNibble] = neighbors[0];
+      if (!(neighbor instanceof Trie)) {
+        neighbor = await node.store.get(neighbor.hash, Trie.deserialise);
+      }
 
       const prefix = [
         node.prefix,
@@ -1744,13 +2348,20 @@ async function tryDelete(self, key) {
         neighbor.prefix,
       ].join('');
 
-      await self.store.del(neighbor.hash);
+      if (self.store.synchronousRetainedWrites === true) {
+        self.store.deleteRetainedNode(neighbor.hash);
+      } else {
+        await self.store.del(neighbor.hash);
+      }
 
       if (neighbor instanceof Leaf) {
         return node.into(Leaf, prefix, neighbor.key, neighbor.value);
       }
 
       node.children = neighbor.children;
+      node.__midgardMerkleNodes = undefined;
+      node.__midgardDirtyChild = undefined;
+      node.__midgardMerkleAuthenticated = false;
       node.prefix = prefix;
       node.size = neighbor.size;
     }
