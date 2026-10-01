@@ -24,10 +24,10 @@ test combine_null_hash() {
 test examples_suffix() {
   and {
     suffix(#"abcd456789", 0) == #"ffabcd456789",
-    suffix(#"abcd456789", 1) == #"000bcd456789",
+    suffix(#"abcd456789", 1) == #"100bcd456789",
     suffix(#"abcd456789", 2) == #"ffcd456789",
     suffix(#"abcd456789", 4) == #"ff456789",
-    suffix(#"abcd456789", 5) == #"00056789",
+    suffix(#"abcd456789", 5) == #"10056789",
     suffix(#"abcd456789", 10) == #"ff",
   }
 }
@@ -36,10 +36,13 @@ test prop_suffix_prefix(params via both(fuzz.bytearray(), int_between(0, 31))) {
   let str = suffix(params.1st, params.2nd)
   let head = index_bytearray(str, 0)
 
-  if head == 0 {
-    index_bytearray(str, 1) < 16
-  } else {
-    head == 255
+  and {
+    head >= 16,
+    if head == 0x10 {
+      index_bytearray(str, 1) < 16
+    } else {
+      head == 255
+    },
   }
 }
 

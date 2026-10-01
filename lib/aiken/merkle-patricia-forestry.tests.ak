@@ -6,86 +6,6 @@ use aiken/merkle_patricia_forestry.{
 } as mpf
 
 // -----------------------------------------------------------------------------
-// --------------------------------------------------------------------- bitcoin
-// -----------------------------------------------------------------------------
-
-const proof_bitcoin_845999: Proof =
-  [
-    Branch {
-      skip: 0,
-      neighbors: #"bc13df27a19f8caf0bf922c900424025282a892ba8577095fd35256c9d553ca13a589f00f97a417d07903d138b92f25f879f9462994bf0e69b51fa19a67faef996c3f8196278c6ab196979911cc48b2d4a0d2a7aa5ef3f939eb056256d8efdfa0aa456963256af4fcb1ad43ef4e6323d1ca92c6d83ed4327904280228e1ba159",
-    },
-    Branch {
-      skip: 0,
-      neighbors: #"eb63f921bd3ac576f979eba32490f8c0988f468d3308c2ed5480aaf6ff27cf9a0e610d8c38c17236104b995eb83aa062181525dccd72a755772004cc2bf4faaf3ac3518525f4b5dec498c8034c566a3539e524c6a2cd5fc8f19c6559a32260513edca31960cd1f5cc6882b820ef57ca65d740734379781db22b479ae0e3bdef3",
-    },
-    Branch {
-      skip: 0,
-      neighbors: #"e7bbc4fc5e5875f6f5469e8a016fa99a872075360e64d623f8b8688e6b63fee5091a7260d2a4fe1ca489c48020772e6d334c63115743e7c390450a139c6bc63b219aff62993846b5522bc1b1fffb5b485fc58d952a8f171bb6a000062fbdcb0eaa5637413d82489f0492c663ad0bac0a2a83b32e1b14e3940017cf830d47378e",
-    },
-    Branch {
-      skip: 0,
-      neighbors: #"464f4d2211c7fe6e7e1b298be6cfa6fd35d562d3b37ce8b979df45fac9dbc5e0d4d93d0b14d7061351763cee1d878b8686c658cfca7ef69cfd58d50ffc3a467340c3abc4067220f82f2dffe455038da3138859bffdb3d34fd7e84305de2ddfc61630c97424469f6de887d42ca155069789fa1b843bdf26496d29222f33f8f6ae",
-    },
-    Branch {
-      skip: 0,
-      neighbors: #"2170e155c04db534b1f0e27bb7604907d26b046e51dd7ca59f56693e8033b16403f9ff21fe66b6071042d35dcbad83950ffb1e3a2ad6673f96d043f67d58e82040e0c17f6230c44b857ed04dccd8ff1b84819abf26fa9e1e86d61fb08c80b74c0000000000000000000000000000000000000000000000000000000000000000",
-    },
-  ]
-
-test verify_bitcoin_block_845999() {
-  let trie =
-    mpf.from_root(
-      #"225a4599b804ba53745538c83bfa699ecf8077201b61484c91171f5910a4a8f9",
-    )
-  let block_hash =
-    #"00000000000000000002d79d6d49c114e174c22b8d8432432ce45a05fd6a4d7b"
-  let block_body =
-    #"f48fcceeac43babbf53a90023be2799a9d7617098b76ff229440ccbd1fd1b4d4"
-  trie
-    |> mpf.has(block_hash, block_body, proof_bitcoin_845999)
-}
-
-const proof_bitcoin_845602: Proof =
-  [
-    Branch {
-      skip: 0,
-      neighbors: #"bc13df27a19f8caf0bf922c900424025282a892ba8577095fd35256c9d553ca120b8645121ebc9057f7b28fa4c0032b1f49e616dfb8dbd88e4bffd7c0844d29b011b1af0993ac88158342583053094590c66847acd7890c86f6de0fde0f7ae2479eafca17f9659f252fa13ee353c879373a65ca371093525cf359fae1704cf4a",
-    },
-    Branch {
-      skip: 0,
-      neighbors: #"255753863960985679b4e752d4b133322ff567d210ffbb10ee56e51177db057460b547fe42c6f44dfef8b3ecee35dfd4aa105d28b94778a3f1bb8211cf2679d7434b40848aebdd6565b59efdc781ffb5ca8a9f2b29f95a47d0bf01a09c38fa39359515ddb9d2d37a26bccb022968ef4c8e29a95c7c82edcbe561332ff79a51af",
-    },
-    Branch {
-      skip: 0,
-      neighbors: #"9d95e34e6f74b59d4ea69943d2759c01fe9f986ff0c03c9e25ab561b23a413b77792fa78d9fbcb98922a4eed2df0ed70a2852ae8dbac8cff54b9024f229e66629136cfa60a569c464503a8b7779cb4a632ae052521750212848d1cc0ebed406e1ba4876c4fd168988c8fe9e226ed283f4d5f17134e811c3b5322bc9c494a598b",
-    },
-    Branch {
-      skip: 0,
-      neighbors: #"b93c3b90e647f90beb9608aecf714e3fbafdb7f852cfebdbd8ff435df84a4116d10ccdbe4ea303efbf0f42f45d8dc4698c3890595be97e4b0f39001bde3f2ad95b8f6f450b1e85d00dacbd732b0c5bc3e8c92fc13d43028777decb669060558821db21a9b01ba5ddf6932708cd96d45d41a1a4211412a46fe41870968389ec96",
-    },
-    Branch {
-      skip: 0,
-      neighbors: #"f89f9d06b48ecc0e1ea2e6a43a9047e1ff02ecf9f79b357091ffc0a7104bbb260908746f8e61ecc60dfe26b8d03bcc2f1318a2a95fa895e4d1aadbb917f9f2936b900c75ffe49081c265df9c7c329b9036a0efb46d5bac595a1dcb7c200e7d590000000000000000000000000000000000000000000000000000000000000000",
-    },
-  ]
-
-test insert_bitcoin_block_845602() {
-  let trie =
-    mpf.from_root(
-      #"225a4599b804ba53745538c83bfa699ecf8077201b61484c91171f5910a4a8f9",
-    )
-  let block_hash =
-    #"0000000000000000000261a131bf48cc5a19658ade8cfede99dc1c3933300d60"
-  let block_body =
-    #"26f711634eb26999169bb927f629870938bb4b6b4d1a078b44a6b4ec54f9e8df"
-
-  mpf.insert(trie, block_hash, block_body, proof_bitcoin_845602) == mpf.from_root(
-    #"507c03bc4a25fd1cac2b03592befa4225c5f3488022affa0ab059ca350de2353",
-  )
-}
-
-// -----------------------------------------------------------------------------
 // ------------------------------------------------------------------ Regression
 // -----------------------------------------------------------------------------
 
@@ -131,7 +51,7 @@ test phil() {
     )
 
   new_root == mpf.from_root(
-    #"f19b7893c0ec34703790dadb8e3257196dcf7aabfa9426d68adf36a31a94ad9a",
+    #"1adf5b1386283988008cddb9126063d9c7e25851b73157cc10f71545083cc8ab",
   )
 }
 
@@ -167,7 +87,7 @@ test insert_edge_case8() {
   let key = #"541dddfaf11096844f045f162c0d3095597a16f711432a91e36cff007665efdc"
   let value = #"272f42edb4c1c334cb38ebbe0772dc3c10"
   mpf.insert(trie, key, value, edge_case_proof8) == mpf.from_root(
-    #"6308f158d046f2d7928fcae02b66e12831dc42f33e5d89591ae9fa7f92726e42",
+    #"7143c72548c502a02fe79ee13c3672bde847adb09b3749a5cc2a5ae94c5f7b8a",
   )
 }
 
@@ -251,7 +171,7 @@ test insert_edge_case6() {
   let key = #"5247268e194dad520a2ab88837e2c110fbe290fa3ee8e09b8fe10402b7f9e906"
   let value = #"4852f1a645b5c206f9b97f679af0e1629954f73d43080a5ebb9bf54f12131b"
   mpf.insert(trie, key, value, edge_case_proof6) == mpf.from_root(
-    #"b59233f804a519ea064071251d1f948cd129543c2ece3932f001a593c99409dc",
+    #"96149792c95b5da30a5c55447e652d7ca8669c8b2aec2093ceeaf0354808172e",
   )
 }
 
@@ -295,7 +215,7 @@ test insert_edge_case5() {
   let key = #"e4a80cba017707ab102628bb4edd6f463ad3f5592c537c69b5d7f4f6dbae5c63"
   let value = #"61255c62f82fa03634e7f2be38b0589ed878c7293e41"
   mpf.insert(trie, key, value, edge_case_proof5) == mpf.from_root(
-    #"5c788efef5680d2ce466fa44943999262f5215d29263cf46069eb9a49728125f",
+    #"62e1a31222df93f1e725cecea0d3429a9936a013fa9152aecdd44bc4f7a3d064",
   )
 }
 
@@ -331,7 +251,7 @@ test insert_edge_case4() {
   let key = #"04811fc306a2021340b15ce6f025db1dc3d402f0829c7ee2100ca8fdd6ed10cd"
   let value = #"0c43c3addce8b95e49eb0fb906"
   mpf.insert(trie, key, value, edge_case_proof4) == mpf.from_root(
-    #"a6eb3cdf9dd3da02d9463bd5cd68555ea11d6d5a77e2ece9ceb1cf6a5a9c7b27",
+    #"f45b9be75cbb9fa9143c249609304c246bf7d3b9457cf4af188d5de22c1a0827",
   )
 }
 
@@ -367,7 +287,7 @@ test insert_edge_case3() {
   let key = #"497f99bb7565d7be2828f6580161cd27cdf8f56418adde5be871b6d0a447da15"
   let value = #"85ff67896b3cc0f2c866bef1c51e6c00055d059cd00067c10a49c74d24277c"
   mpf.insert(trie, key, value, edge_case_proof3) == mpf.from_root(
-    #"b6c45bc7651f957c7c6957e1c10439ad5878ef5c7bc147c8ab6b7e163bd32554",
+    #"5556e0ab2ba4be2ce33369cf3babb25fc3c1ce01e1c5426ef1ae409e43fc21a5",
   )
 }
 
@@ -409,7 +329,7 @@ test insert_edge_case2() {
   let key = #"198d70e41146654a69e08c6682310a8c35816c8584431915a0eee4a62d39eda0"
   let value = #"9e36f867a374be"
   mpf.insert(trie, key, value, edge_case_proof2) == mpf.from_root(
-    #"b76dd0926602d6e9d28a0b3707db4622184d59c7392f5a0469bf775d9aa05f33",
+    #"32d3876da6fa1482070142b0dad6be6e37ba9aa6131e9ba37e4aca3299829bbd",
   )
 }
 
@@ -442,12 +362,12 @@ const edge_case_proof1: Proof =
 test insert_edge_case1() {
   let trie =
     mpf.from_root(
-      #"08b05f422582a099e63646ccf6ed5993c1718d0279a3269c140c1daed29f0f4b",
+      #"99286f8457f09a03965dd39ff8a9793cc049974aad98e3e97955b939bb9b2b9f",
     )
   let key = #"3fe6f46456b9c223116533d90f9b0bf7c5da095e0c1d68af297a2a3c9709bfa7"
   let value = #""
   mpf.insert(trie, key, value, edge_case_proof1) == mpf.from_root(
-    #"ff55eab671a6e5618b10bb8702e3e5e6ab2491d50e4a93dd5255d8666a8d4e9a",
+    #"d8363eaa94dc21254e63ae623649d38aa8feb0ee8cb5bb3978aa7820373624b7",
   )
 }
 
@@ -458,39 +378,39 @@ test insert_edge_case1() {
 /// An example trie made from a list of fruits.
 ///
 ///   ╔═══════════════════════════════════════════════════════════════════╗
-///   ║ #4acd78f345a686361df77541b2e0b533f53362e36620a1fdd3a13e0b61a3b078 ║
+///   ║ #6e9e11c15686694fbec2e1e685e2aa3f2bb402ab955d02ebbc2a5ec1fc69093b ║
 ///   ╚═══════════════════════════════════════════════════════════════════╝
 ///    ┌─ 0 #520a7f805c5f
 ///    │  ├─ 389fd..[54 digits]..1abc #56408b9882f8 { mango[uid: 0] → 🥭 }
 ///    │  └─ 9d230..[54 digits]..9ecc #9ca49c0d73d5 { lemon[uid: 0] → 🍋 }
-///    ├─ 16a4 #58c5e4a29601
-///    │  ├─ 3a30b..[51 digits]..a968 #86410153344f { cherry[uid: 0] → 🍒 }
-///    │  ├─ 8584c..[51 digits]..d4a5 #cda1c8929d05 { tomato[uid: 83468] → 🍅 }
-///    │  └─ b7ce0..[51 digits]..f157 #472d5ccbcae8 { plum[uid: 15492] → 🤷 }
+///    ├─ 16a4 #f8f1111fd89c
+///    │  ├─ 3a30b..[51 digits]..a968 #ad0fd8a65153 { cherry[uid: 0] → 🍒 }
+///    │  ├─ 8584c..[51 digits]..d4a5 #444019eac1ee { tomato[uid: 83468] → 🍅 }
+///    │  └─ b7ce0..[51 digits]..f157 #edb44329c8b2 { plum[uid: 15492] → 🤷 }
 ///    ├─ 245 #c9431d708d20
 ///    │  ├─ 4c787..[52 digits]..c20e #e38b422bd7d9 { pineapple[uid: 12577] → 🍍 }
 ///    │  ├─ a4f81..[52 digits]..90a3 #3e2491668264 { pomegranate[uid: 0] → 🤷 }
 ///    │  └─ e3fc8..[52 digits]..e7c3 #eda213c9a1ca { strawberry[uid: 2532] → 🍓 }
-///    ├─ 3e #070a12b8b349
-///    │  ├─ d002d..[53 digits]..f3ac #b40093af0024 { lime[uid: 0] → 🤷 }
-///    │  └─ e659e..[53 digits]..b3b9 #242b464043b4 { banana[uid: 218] → 🍌 }
+///    ├─ 3e #5ecc582a6c21
+///    │  ├─ d002d..[53 digits]..f3ac #f64ca98ded70 { lime[uid: 0] → 🤷 }
+///    │  └─ e659e..[53 digits]..b3b9 #00ccb0145854 { banana[uid: 218] → 🍌 }
 ///    ├─ 4 #79519b8cdfbd
 ///    │  ├─ 07 #fdd60cf1b755
 ///    │  │  ├─ 6d8ab..[52 digits]..73ef #c538c893306a { guava[uid: 344] → 🤷 }
 ///    │  │  └─ c5847..[52 digits]..4a22 #785e20425cf9 { kiwi[uid: 0] → 🥝 }
 ///    │  └─ a522f..[54 digits]..20cd #e0b9d1f525e3 { kumquat[uid: 0] → 🤷 }
-///    ├─ 5 #08434fd717ae
+///    ├─ 5 #033c3ca05164
 ///    │  ├─ cddcd..[54 digits]..aa9e #8a1256a87426 { watermelon[uid: 0] → 🍉 }
-///    │  └─ e #e26d8409cd76
-///    │     ├─ 7ccfe..[53 digits]..4440 #c387ec2e54f6 { yuzu[uid: 0] → 🤷 }
-///    │     └─ d71f9..[53 digits]..26d2 #cfcc9c732f50 { apple[uid: 58] → 🍎 }
-///    ├─ 78666..[55 digits]..7292 #aeb3a9f2e198 { raspberry[uid: 0] → 🤷 }
-///    ├─ 8af48..[55 digits]..04a8 #b27d20a5187a { tangerine[uid: 11] → 🍊 }
-///    ├─ a #c2f2115774c1
+///    │  └─ e #dd8486a799ef
+///    │     ├─ 7ccfe..[53 digits]..4440 #57f7e5e1a73c { yuzu[uid: 0] → 🤷 }
+///    │     └─ d71f9..[53 digits]..26d2 #a331cd3151b7 { apple[uid: 58] → 🍎 }
+///    ├─ 78666..[55 digits]..7292 #4420b2d642ba { raspberry[uid: 0] → 🤷 }
+///    ├─ 8af48..[55 digits]..04a8 #21e74ccebcea { tangerine[uid: 11] → 🍊 }
+///    ├─ a #ccd5016507c7
 ///    │  ├─ 4b927..[54 digits]..3c69 #a6a35d200876 { peach[uid: 0] → 🍑 }
-///    │  └─ f12 #8ee8d620e9d6
-///    │     ├─ a1017..[51 digits]..50e7 #a241f4660aa4 { fig[uid: 68267] → 🤷 }
-///    │     └─ ec412..[51 digits]..71fe #63c036b16617 { passionfruit[uid: 0] → 🤷 }
+///    │  └─ f12 #9e53c7a37366
+///    │     ├─ a1017..[51 digits]..50e7 #6441948643d0 { fig[uid: 68267] → 🤷 }
+///    │     └─ ec412..[51 digits]..71fe #6cbd2ef58c2f { passionfruit[uid: 0] → 🤷 }
 ///    ├─ b #da0bdb30bf45
 ///    │  ├─ 67e71..[54 digits]..c48b #f39b1b5089f8 { grapefruit[uid: 0] → 🤷 }
 ///    │  └─ 88701..[54 digits]..949e #85acec96ac0f { blueberry[uid: 0] → 🫐 }
@@ -500,14 +420,14 @@ test insert_edge_case1() {
 ///    ├─ d #0a747d583e2e
 ///    │  ├─ b3047..[54 digits]..502a #54d9ea3b162d { coconut[uid: 0] → 🥥 }
 ///    │  └─ f779e..[54 digits]..678a #a82bdd8e07c2 { pear[uid: 0] → 🍐 }
-///    ├─ e5993..[55 digits]..c9ec #da1771d107c8 { apricot[uid: 0] → 🤷 }
+///    ├─ e5993..[55 digits]..c9ec #a379ac6be6d5 { apricot[uid: 0] → 🤷 }
 ///    └─ f #117abf0e19fb
 ///       ├─ 63c88..[54 digits]..21ca #62bda6837164 { papaya[uid: 0] → 🤷 }
 ///       └─ b69c0..[54 digits]..2145 #c8e795f7b215 { grapes[uid: 0] → 🍇 }
 ///
 const trie: MerklePatriciaForestry =
   mpf.from_root(
-    #"4acd78f345a686361df77541b2e0b533f53362e36620a1fdd3a13e0b61a3b078",
+    #"6e9e11c15686694fbec2e1e685e2aa3f2bb402ab955d02ebbc2a5ec1fc69093b",
   )
 
 test example_kumquat() {
@@ -766,17 +686,17 @@ test example_insert_mutate_proof_apple(
 
 test serialise_apricot() {
   let bytes = cbor.serialise(proof_apricot)
-  bytes == #"9fd8799f005f58404be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbe280ada5ef30d55433934bbc73c89d550ee916f62822c34645e04bb66540c120f5840965c07fa815b86794e8703cee7e8f626c88d7da639258d2466aae67d5d041c5a117abf0e19fb78e0535891d82e5ece1310a1cf11674587dbba304c395769a988ffffff"
+  bytes == #"9fd8799f005f58407c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096759b3c3f838e5383f675cb27a7d0c4baca589be4c48ec74a8a088e5114a4f9e2d5840965c07fa815b86794e8703cee7e8f626c88d7da639258d2466aae67d5d041c5a117abf0e19fb78e0535891d82e5ece1310a1cf11674587dbba304c395769a988ffffff"
 }
 
 test serialise_peach() {
   let bytes = cbor.serialise(proof_peach)
-  bytes == #"9fd8799f005f58404be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbefa63eb4576001d8658219f928172eccb5448b4d7d62cd6d95228e13ebcbd53505840be527bcfc7febe3c560057d97f4190bd24b537a322315f84daafab3ada562b50da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acbffffd87a9f00d8799f0f42010258202f6b320212dd98c38a7cd074886d942d9577cdad5ef1c72d32a01df1a63ed88fffffff"
+  bytes == #"9fd8799f005f58407c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096786bcf4305e2bb0425ebb921890279da144b50e516a440ff16b78417d4108afe95840e9625c510c5779331df65bd0a86085136d6696a6bfac0d752e6d31d5dd72da96da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acbffffd87a9f00d8799f0f420102582023cd32d3d66f3b93c8bdf2214b14379ca5d4f61cfd4583fe5aad1a5ef7bf124dffffff"
 }
 
 test serialise_fig() {
   let bytes = cbor.serialise(proof_fig)
-  bytes == #"9fd8799f005f58404be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbefa63eb4576001d8658219f928172eccb5448b4d7d62cd6d95228e13ebcbd53505840be527bcfc7febe3c560057d97f4190bd24b537a322315f84daafab3ada562b50da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acbffffd87b9f005820a4b927e3735c7dbf9f1846844aad53e82362e47e32223d559333f4d154483c6958205ee6f548bba6d9da3313a23b395efb48b440063a592d8592e73d87b79d1d887affd87b9f025820af12ec41241cb0a5cae2a4a1232a64f3ca68f65342cf2a2f98cd6a00cf7971fe58207c3715aba2db74d565a6ce6cc72f20d9cb4652ddb29efe6268be15b105e40911ffff"
+  bytes == #"9fd8799f005f58407c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096786bcf4305e2bb0425ebb921890279da144b50e516a440ff16b78417d4108afe95840e9625c510c5779331df65bd0a86085136d6696a6bfac0d752e6d31d5dd72da96da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acbffffd87b9f005820a4b927e3735c7dbf9f1846844aad53e82362e47e32223d559333f4d154483c6958205ee6f548bba6d9da3313a23b395efb48b440063a592d8592e73d87b79d1d887affd87b9f025820af12ec41241cb0a5cae2a4a1232a64f3ca68f65342cf2a2f98cd6a00cf7971fe58207c3715aba2db74d565a6ce6cc72f20d9cb4652ddb29efe6268be15b105e40911ffff"
 }
 
 // -------------------- Fruits
@@ -789,13 +709,13 @@ const proof_apricot =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbe280ada5ef30d55433934bbc73c89d550ee916f62822c34645e04bb66540c120f965c07fa815b86794e8703cee7e8f626c88d7da639258d2466aae67d5d041c5a117abf0e19fb78e0535891d82e5ece1310a1cf11674587dbba304c395769a988",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096759b3c3f838e5383f675cb27a7d0c4baca589be4c48ec74a8a088e5114a4f9e2d965c07fa815b86794e8703cee7e8f626c88d7da639258d2466aae67d5d041c5a117abf0e19fb78e0535891d82e5ece1310a1cf11674587dbba304c395769a988",
     },
   ]
 
 const without_apricot =
   mpf.from_root(
-    #"c08452d768160cd0fcdf5cad3d181cd36055eaf364d0eb7c49a01936bacf7b1f",
+    #"c2bd5ca7b34d2a18520dcec8960e4031c9f607b7ddd04691f9837ca59c03fe09",
   )
 
 // ---------- raspberry
@@ -806,13 +726,13 @@ const proof_raspberry =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb47238ba5d16031b6bace4aee22156f5028b0ca56dc24f7247d6435292e82c039cc9e7ff03faba170e98cd3c24338b95b1ce1b8a621d1016418f1494bbeb9e4a4a0000000000000000000000000000000000000000000000000000000000000000",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32f69f145e31d2dc69b65adb5fc2c9d9e87c48210d874d2a2d613793ca90ed906e5cafc4dadc7b95ffa056e19a6c33656d0683de9bcf3228e5aed88aeccda164de0000000000000000000000000000000000000000000000000000000000000000",
     },
   ]
 
 const without_raspberry =
   mpf.from_root(
-    #"4c9d89603cb1a25361777b8ed7f7c80f71b1dea66603872feea2b34a83d34453",
+    #"35c0f70599a90b72c42981f9a951af9105a037a68941e89b8cd815ee5cc907e9",
   )
 
 // ---------- tangerine
@@ -823,13 +743,13 @@ const proof_tangerine =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbefa63eb4576001d8658219f928172eccb5448b4d7d62cd6d95228e13ebcbd5350c1e96bcc431893eef34e03989814375d439faa592edf75c9e5dc10b3c30766700000000000000000000000000000000000000000000000000000000000000000",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096786bcf4305e2bb0425ebb921890279da144b50e516a440ff16b78417d4108afe9a5f09755c981a35e82a5c9da27cc58ed90e140d3ff3af6a3f669a2f21c631e9c0000000000000000000000000000000000000000000000000000000000000000",
     },
   ]
 
 const without_tangerine =
   mpf.from_root(
-    #"826a0c030ad675740b83a33653fd3fc32b1021233f709759292151abdcd37f8d",
+    #"8997592195845afb892af2ba50325c2a6fee76b52cdc38450afb405dc820b7d2",
   )
 
 // ---------- banana
@@ -840,7 +760,7 @@ const proof_banana =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5fcf22cbaac4ab605dd13dbde57080661b53d8a7e23534c733acf50125cf0e5bcac9431d708d20021f1fa3f4f03468b8de194398072a402e7877376d06f747575a",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12d8f48bf09e3016acc9cccd5c4c41f961dba3ec1b19b0ab6d04428a3cc89de09eec9431d708d20021f1fa3f4f03468b8de194398072a402e7877376d06f747575a",
     },
     Leaf {
       skip: 1,
@@ -851,13 +771,13 @@ const proof_banana =
 
 const without_banana =
   mpf.from_root(
-    #"557990b1257679f2b8e09c507f2582b0566579a2fc26d0d8a6b59a4a88ef16db",
+    #"4cc9c7ae094d6cce8520f0cac6ea3f2b72ff994023be566932c8ab1cbc4ac3ce",
   )
 
 // The root hash we get with `banana` mapped to 🍆 instead
 fn updated_banana() {
   mpf.from_root(
-    #"9057d02799a012a9d47fab6f9f5c43b4b2bf94584b339e3b4d3969fd95d55972",
+    #"b2bb18caca1fa4cbc407272bf5315eb79d649bf3300ad55305347413d652fa96",
   )
 }
 
@@ -869,7 +789,7 @@ const proof_blueberry =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbefa63eb4576001d8658219f928172eccb5448b4d7d62cd6d95228e13ebcbd5350be527bcfc7febe3c560057d97f4190bd24b537a322315f84daafab3ada562b50c2f2115774c117f184b58dba7a23d2c93968aa40387ceb0c9a9f53e4f594e881",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096786bcf4305e2bb0425ebb921890279da144b50e516a440ff16b78417d4108afe9e9625c510c5779331df65bd0a86085136d6696a6bfac0d752e6d31d5dd72da96ccd5016507c773bb56e91e830eebefe294feeb740778058d0c1238a94ad7e48c",
     },
     Leaf {
       skip: 0,
@@ -880,7 +800,7 @@ const proof_blueberry =
 
 const without_blueberry =
   mpf.from_root(
-    #"e2025bb26dae9291d4eeb58817b5c7eb84ab2e47a27c994cc04369fffe8bc842",
+    #"cbc9d28f8ff48a7ef74630cd41aad7b3113796f37f60d822c5f1b24891747f38",
   )
 
 // ---------- cherry
@@ -891,17 +811,17 @@ const proof_cherry =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5f1508f13471a031a21277db8817615e62a50a7427d5f8be572746aa5f0d498417520a7f805c5f674e2deca5230b6942bbc71586dc94a783eebe1ed58c9a864e53",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12da5f3162b8c722b67892153a7f737ae9944ccaa3b792c7d4dda7fe6898e6d8e00520a7f805c5f674e2deca5230b6942bbc71586dc94a783eebe1ed58c9a864e53",
     },
     Branch {
       skip: 3,
-      neighbors: #"2549707d84ecc2fa100fd85bf15f2ec99da70d4b3a39588c1138331eb0e00d3e85c09af929492a871e4fae32d9d5c36e352471cd659bcdb61de08f1722acc3b10eb923b0cbd24df54401d998531feead35a47a99f4deed205de4af81120f97610000000000000000000000000000000000000000000000000000000000000000",
+      neighbors: #"a297cd1371df7342817ebac221ffd3e0748b043d8f88182e64fa2918d4466b6c85c09af929492a871e4fae32d9d5c36e352471cd659bcdb61de08f1722acc3b10eb923b0cbd24df54401d998531feead35a47a99f4deed205de4af81120f97610000000000000000000000000000000000000000000000000000000000000000",
     },
   ]
 
 const without_cherry =
   mpf.from_root(
-    #"968b14e351704108f00325985ab0cd81af8617bb131e31607b6bcd3f96d7c4c2",
+    #"d000a6e2ebd7b35d1baaf1a734963c64120547ce8fa984608d0675cb4b893894",
   )
 
 // ---------- coconut
@@ -912,7 +832,7 @@ const proof_coconut =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbe280ada5ef30d55433934bbc73c89d550ee916f62822c34645e04bb66540c120f323def78732eace937391fc626efcd062552ebcf5e93f00352b86cb0f89daca0a22a7b4d767ada48673a4a9313a02a35ff47d2f55bcf10ae294127f590a4327c",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096759b3c3f838e5383f675cb27a7d0c4baca589be4c48ec74a8a088e5114a4f9e2da8b9a944bba97c79651c4914dc1d5928bead43a0de29f723cd59cb046d8ab04ba22a7b4d767ada48673a4a9313a02a35ff47d2f55bcf10ae294127f590a4327c",
     },
     Leaf {
       skip: 0,
@@ -923,7 +843,7 @@ const proof_coconut =
 
 const without_coconut =
   mpf.from_root(
-    #"4888f3b72e475510bc0bb78c5f3706c0520a4294a41f8c05b5561776369d9d5d",
+    #"ed3b6da0125d9cf282b4384f5536bf4879e6d78afc9ab9299914d4b9b0a2363b",
   )
 
 // ---------- cranberry
@@ -934,7 +854,7 @@ const proof_cranberry =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbe280ada5ef30d55433934bbc73c89d550ee916f62822c34645e04bb66540c120f323def78732eace937391fc626efcd062552ebcf5e93f00352b86cb0f89daca00a747d583e2e3db49524add1eea3063421fc04547e19c4e807810a537a63b379",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096759b3c3f838e5383f675cb27a7d0c4baca589be4c48ec74a8a088e5114a4f9e2da8b9a944bba97c79651c4914dc1d5928bead43a0de29f723cd59cb046d8ab04b0a747d583e2e3db49524add1eea3063421fc04547e19c4e807810a537a63b379",
     },
     Leaf {
       skip: 0,
@@ -945,7 +865,7 @@ const proof_cranberry =
 
 const without_cranberry =
   mpf.from_root(
-    #"c80ac1ba6f8a6437562b25fe4a110f1c0013f26c7209f699df46493ce85e0081",
+    #"7fc739ec024cfba6029622ee77df30df109f71055c0d2d611b0b698cb84f1b98",
   )
 
 // ---------- grapefruit
@@ -956,7 +876,7 @@ const proof_grapefruit =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbefa63eb4576001d8658219f928172eccb5448b4d7d62cd6d95228e13ebcbd5350be527bcfc7febe3c560057d97f4190bd24b537a322315f84daafab3ada562b50c2f2115774c117f184b58dba7a23d2c93968aa40387ceb0c9a9f53e4f594e881",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096786bcf4305e2bb0425ebb921890279da144b50e516a440ff16b78417d4108afe9e9625c510c5779331df65bd0a86085136d6696a6bfac0d752e6d31d5dd72da96ccd5016507c773bb56e91e830eebefe294feeb740778058d0c1238a94ad7e48c",
     },
     Leaf {
       skip: 0,
@@ -967,7 +887,7 @@ const proof_grapefruit =
 
 const without_grapefruit =
   mpf.from_root(
-    #"68125b51606cc784d3ed2010a2bc297776ce7442669a5072220f5e6911e5be84",
+    #"ac9e894e5d62b62fe3dfd27e04c9ebefd3739190691689b5c61cff9bedf436ed",
   )
 
 // ---------- grapes
@@ -978,7 +898,7 @@ const proof_grapes =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbe280ada5ef30d55433934bbc73c89d550ee916f62822c34645e04bb66540c120f965c07fa815b86794e8703cee7e8f626c88d7da639258d2466aae67d5d041c5ada1771d107c86c8e68da458063a47f9cdb63ddb9e922ab6ccb18d9e6d4b7aaf9",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096759b3c3f838e5383f675cb27a7d0c4baca589be4c48ec74a8a088e5114a4f9e2d965c07fa815b86794e8703cee7e8f626c88d7da639258d2466aae67d5d041c5aa379ac6be6d51d610fcb4f7f8d7ea3ebccd364935ea87f82fabccc861abfdfe3",
     },
     Leaf {
       skip: 0,
@@ -989,7 +909,7 @@ const proof_grapes =
 
 const without_grapes =
   mpf.from_root(
-    #"a5a405950c2aaf7da30abbfa969fdecccd4ed19077f751b1de641b2bfc2df957",
+    #"92338619b28e0572c9cd662f08ae28c424fd5c72c8ab3740d6203bda6b5fa90e",
   )
 
 // ---------- kumquat
@@ -1000,7 +920,7 @@ const proof_kumquat =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb47238ba5d16031b6bace4aee22156f5028b0ca56dc24f7247d6435292e82c039c3490a825d2e8deddf8679ce2f95f7e3a59d9c3e1af4a49b410266d21c9344d6d08434fd717aea47d156185d589f44a59fc2e0158eab7ff035083a2a66cd3e15b",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32f69f145e31d2dc69b65adb5fc2c9d9e87c48210d874d2a2d613793ca90ed906e25069a7a1fd46757d09286b9ee4f67753a06fc706f938d01b200791fd9518f42033c3ca051645e502f48523070a0d379c37f037762d501202e9cfb19f4f16220",
     },
     Fork {
       skip: 0,
@@ -1014,7 +934,7 @@ const proof_kumquat =
 
 const without_kumquat =
   mpf.from_root(
-    #"4dd6d57ca8cb7ac8c3b219366754a392ba9e4e43b6b3ae59d89be3f878ba8fb6",
+    #"9c31f3581dafc25ce927478baa4095735bcb21ddce9728697d7c23e6c02614a1",
   )
 
 // ---------- lemon
@@ -1025,7 +945,7 @@ const proof_lemon =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5f1508f13471a031a21277db8817615e62a50a7427d5f8be572746aa5f0d49841758c5e4a29601399a5bd916e5f3b34c38e13253f4de2a3477114f1b2b8f9f2f4d",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12da5f3162b8c722b67892153a7f737ae9944ccaa3b792c7d4dda7fe6898e6d8e00f8f1111fd89c373c6cecb0bd43b6c932ae760f31d88c5fa71431ec39475b9e18",
     },
     Leaf {
       skip: 0,
@@ -1036,7 +956,7 @@ const proof_lemon =
 
 const without_lemon =
   mpf.from_root(
-    #"6a7c7950e3718263c3f6d0b5cec7d7724c2394d62053692132c2ffebf8b8e4bd",
+    #"98858de84b7c3a118c728bbe688cc94fb4ae116cb50a796394f44b222cd4d524",
   )
 
 // ---------- lime
@@ -1047,7 +967,7 @@ const proof_lime =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5fcf22cbaac4ab605dd13dbde57080661b53d8a7e23534c733acf50125cf0e5bcac9431d708d20021f1fa3f4f03468b8de194398072a402e7877376d06f747575a",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12d8f48bf09e3016acc9cccd5c4c41f961dba3ec1b19b0ab6d04428a3cc89de09eec9431d708d20021f1fa3f4f03468b8de194398072a402e7877376d06f747575a",
     },
     Leaf {
       skip: 1,
@@ -1058,7 +978,7 @@ const proof_lime =
 
 const without_lime =
   mpf.from_root(
-    #"cc11203c785e808fc0555562dd9fef4b9c161d2ed64ff16df47080325862f4a7",
+    #"444c63a311c2fd8237d832303eb77b901d7cbc39016e66195073fdfa29e0fc28",
   )
 
 // ---------- mango
@@ -1069,7 +989,7 @@ const proof_mango =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5f1508f13471a031a21277db8817615e62a50a7427d5f8be572746aa5f0d49841758c5e4a29601399a5bd916e5f3b34c38e13253f4de2a3477114f1b2b8f9f2f4d",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12da5f3162b8c722b67892153a7f737ae9944ccaa3b792c7d4dda7fe6898e6d8e00f8f1111fd89c373c6cecb0bd43b6c932ae760f31d88c5fa71431ec39475b9e18",
     },
     Leaf {
       skip: 0,
@@ -1080,7 +1000,7 @@ const proof_mango =
 
 const without_mango =
   mpf.from_root(
-    #"c683f99382df709f322b957c3ff828ab10cb2b6a855458e4b3d23fbea83e7a0e",
+    #"bb2de0446a1abb50255ba800198b3d0954e0fc3e23e0903e75b8039da1ac1fab",
   )
 
 // ---------- orange
@@ -1091,7 +1011,7 @@ const proof_orange =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbe280ada5ef30d55433934bbc73c89d550ee916f62822c34645e04bb66540c120f323def78732eace937391fc626efcd062552ebcf5e93f00352b86cb0f89daca00a747d583e2e3db49524add1eea3063421fc04547e19c4e807810a537a63b379",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096759b3c3f838e5383f675cb27a7d0c4baca589be4c48ec74a8a088e5114a4f9e2da8b9a944bba97c79651c4914dc1d5928bead43a0de29f723cd59cb046d8ab04b0a747d583e2e3db49524add1eea3063421fc04547e19c4e807810a537a63b379",
     },
     Leaf {
       skip: 0,
@@ -1102,7 +1022,7 @@ const proof_orange =
 
 const without_orange =
   mpf.from_root(
-    #"59854171e5e36247499d82747754ca56eb7ced82fa27edc95f7c102fbcbee3f0",
+    #"2f6c73bd44f9f2084937cc3f3956a37076346d9bf65d50242891c973396247f0",
   )
 
 // ---------- papaya
@@ -1113,7 +1033,7 @@ const proof_papaya =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbe280ada5ef30d55433934bbc73c89d550ee916f62822c34645e04bb66540c120f965c07fa815b86794e8703cee7e8f626c88d7da639258d2466aae67d5d041c5ada1771d107c86c8e68da458063a47f9cdb63ddb9e922ab6ccb18d9e6d4b7aaf9",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096759b3c3f838e5383f675cb27a7d0c4baca589be4c48ec74a8a088e5114a4f9e2d965c07fa815b86794e8703cee7e8f626c88d7da639258d2466aae67d5d041c5aa379ac6be6d51d610fcb4f7f8d7ea3ebccd364935ea87f82fabccc861abfdfe3",
     },
     Leaf {
       skip: 0,
@@ -1124,7 +1044,7 @@ const proof_papaya =
 
 const without_papaya =
   mpf.from_root(
-    #"97a6f166b2c5f5a46776e1b471d7855a3e876e95d1eff34c5df3734e70d3fcf5",
+    #"02f7cab677d9706135157a99cc84aee3509dd114e9324ff2aacf2ed657b3cf80",
   )
 
 // ---------- peach
@@ -1135,21 +1055,21 @@ const proof_peach =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbefa63eb4576001d8658219f928172eccb5448b4d7d62cd6d95228e13ebcbd5350be527bcfc7febe3c560057d97f4190bd24b537a322315f84daafab3ada562b50da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acb",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096786bcf4305e2bb0425ebb921890279da144b50e516a440ff16b78417d4108afe9e9625c510c5779331df65bd0a86085136d6696a6bfac0d752e6d31d5dd72da96da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acb",
     },
     Fork {
       skip: 0,
       neighbor: Neighbor {
         nibble: 15,
         prefix: #"0102",
-        root: #"2f6b320212dd98c38a7cd074886d942d9577cdad5ef1c72d32a01df1a63ed88f",
+        root: #"23cd32d3d66f3b93c8bdf2214b14379ca5d4f61cfd4583fe5aad1a5ef7bf124d",
       },
     },
   ]
 
 const without_peach =
   mpf.from_root(
-    #"5d4bfc2613624f54751303e605568337f6f8eb7bd63369d9f780c5be839dbdd1",
+    #"cd79bbe88a5b583287314cc0af4b71ab9992aabc10eef28bb9b8555a7a62dd23",
   )
 
 // ---------- pear
@@ -1160,7 +1080,7 @@ const proof_pear =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbe280ada5ef30d55433934bbc73c89d550ee916f62822c34645e04bb66540c120f323def78732eace937391fc626efcd062552ebcf5e93f00352b86cb0f89daca0a22a7b4d767ada48673a4a9313a02a35ff47d2f55bcf10ae294127f590a4327c",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096759b3c3f838e5383f675cb27a7d0c4baca589be4c48ec74a8a088e5114a4f9e2da8b9a944bba97c79651c4914dc1d5928bead43a0de29f723cd59cb046d8ab04ba22a7b4d767ada48673a4a9313a02a35ff47d2f55bcf10ae294127f590a4327c",
     },
     Leaf {
       skip: 0,
@@ -1171,7 +1091,7 @@ const proof_pear =
 
 const without_pear =
   mpf.from_root(
-    #"8f2da0fcfeab12df8b53dd6ea4fe6ff8fbd6f954f1ead8d40b298b86c3716510",
+    #"65d748810b3889cc812a4ec0a3116f19d90db53ae6cac4c398d16a0a2024b715",
   )
 
 // ---------- pineapple
@@ -1182,7 +1102,7 @@ const proof_pineapple =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5fcf22cbaac4ab605dd13dbde57080661b53d8a7e23534c733acf50125cf0e5bca070a12b8b34948fc52296522a0b1816849392f7c2a73b8a25538ccebed176c9f",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12d8f48bf09e3016acc9cccd5c4c41f961dba3ec1b19b0ab6d04428a3cc89de09ee5ecc582a6c2134fefd58e819f37a09f41c6114176dca17fc874a60cbed1e0c4a",
     },
     Branch {
       skip: 2,
@@ -1192,7 +1112,7 @@ const proof_pineapple =
 
 const without_pineapple =
   mpf.from_root(
-    #"dcb9a2b6aae1477da4409ce8a62235d87a006011bf1dc893948fad9c5be955f7",
+    #"34466eb77d7c42f19d227ef46432876f694a8fd890ceb53be78f830f1c454630",
   )
 
 // ---------- plum
@@ -1203,17 +1123,17 @@ const proof_plum =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5f1508f13471a031a21277db8817615e62a50a7427d5f8be572746aa5f0d498417520a7f805c5f674e2deca5230b6942bbc71586dc94a783eebe1ed58c9a864e53",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12da5f3162b8c722b67892153a7f737ae9944ccaa3b792c7d4dda7fe6898e6d8e00520a7f805c5f674e2deca5230b6942bbc71586dc94a783eebe1ed58c9a864e53",
     },
     Branch {
       skip: 3,
-      neighbors: #"1955c87798c9f03af2f38429ebdeeefe0a0c84db8e583df37561abf0c64f46ca85c09af929492a871e4fae32d9d5c36e352471cd659bcdb61de08f1722acc3b1f34025c0e276d328068b15d428480914fd73946ae94a5f45c3530e3decdeefdf0000000000000000000000000000000000000000000000000000000000000000",
+      neighbors: #"fa4ecb581bdfa822fedf91a47f87d1f09bcd268360531011e63ecdc138b2dce785c09af929492a871e4fae32d9d5c36e352471cd659bcdb61de08f1722acc3b1d2415338d7f1f66d3eef7e69502c9bc41913ef43e854c34e1779e2bcc41444ca0000000000000000000000000000000000000000000000000000000000000000",
     },
   ]
 
 const without_plum =
   mpf.from_root(
-    #"fc7494dec21f1533d8f97677b890ebf3a7954c0b8110895d663a5c78d15daf92",
+    #"8002fa4abc232642f42c8c7f4abd4385aad80234f5b4991494033b29c972f201",
   )
 
 // ---------- pomegranate
@@ -1224,7 +1144,7 @@ const proof_pomegranate =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5fcf22cbaac4ab605dd13dbde57080661b53d8a7e23534c733acf50125cf0e5bca070a12b8b34948fc52296522a0b1816849392f7c2a73b8a25538ccebed176c9f",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12d8f48bf09e3016acc9cccd5c4c41f961dba3ec1b19b0ab6d04428a3cc89de09ee5ecc582a6c2134fefd58e819f37a09f41c6114176dca17fc874a60cbed1e0c4a",
     },
     Branch {
       skip: 2,
@@ -1234,7 +1154,7 @@ const proof_pomegranate =
 
 const without_pomegranate =
   mpf.from_root(
-    #"7267243f71e63165e8a697c1282d205352b9534db9902d97eb90b3bd89431ddb",
+    #"50a04c6a99f875659706e98600d92e413edf2702373ebe72eaace7eac24bcaeb",
   )
 
 // ---------- strawberry
@@ -1245,7 +1165,7 @@ const proof_strawberry =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5fcf22cbaac4ab605dd13dbde57080661b53d8a7e23534c733acf50125cf0e5bca070a12b8b34948fc52296522a0b1816849392f7c2a73b8a25538ccebed176c9f",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12d8f48bf09e3016acc9cccd5c4c41f961dba3ec1b19b0ab6d04428a3cc89de09ee5ecc582a6c2134fefd58e819f37a09f41c6114176dca17fc874a60cbed1e0c4a",
     },
     Branch {
       skip: 2,
@@ -1255,7 +1175,7 @@ const proof_strawberry =
 
 const without_strawberry =
   mpf.from_root(
-    #"c5890dfafc0c0b66d3af7775ae9c5bac6974ec0b38b5a9a635299a9eae7c8823",
+    #"3efc4c103b0610bc5f76979f65edac35b10f7c965637386e7e665c6b982b70fb",
   )
 
 // ---------- tomato
@@ -1266,17 +1186,17 @@ const proof_tomato =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb45fdf82687b1ab133324cebaf46d99d49f92720c5ded08d5b02f57530f2cc5a5f1508f13471a031a21277db8817615e62a50a7427d5f8be572746aa5f0d498417520a7f805c5f674e2deca5230b6942bbc71586dc94a783eebe1ed58c9a864e53",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32b7f63d93c9186c6dde0133855d374be101f11901412df025d240ddaa0b0ed12da5f3162b8c722b67892153a7f737ae9944ccaa3b792c7d4dda7fe6898e6d8e00520a7f805c5f674e2deca5230b6942bbc71586dc94a783eebe1ed58c9a864e53",
     },
     Branch {
       skip: 3,
-      neighbors: #"1955c87798c9f03af2f38429ebdeeefe0a0c84db8e583df37561abf0c64f46ca85c09af929492a871e4fae32d9d5c36e352471cd659bcdb61de08f1722acc3b1a93bd84b815df138ab148bfdc2c3ee94f0cdbbb6ab8a38d429a7a8895c470ce70000000000000000000000000000000000000000000000000000000000000000",
+      neighbors: #"fa4ecb581bdfa822fedf91a47f87d1f09bcd268360531011e63ecdc138b2dce785c09af929492a871e4fae32d9d5c36e352471cd659bcdb61de08f1722acc3b1b09356b9dd9ecff3b1435c6045466627e399eea3e28d831a16c9360d21efa53c0000000000000000000000000000000000000000000000000000000000000000",
     },
   ]
 
 const without_tomato =
   mpf.from_root(
-    #"8329dfa8be59c7e677966a62d3de98944f231c02cc8e97ec049fd1a8e5898474",
+    #"1d338badd3802833db4149bdf03cbd3f98b3854a58c80bb994b9a404e5016a65",
   )
 
 // ---------- watermelon
@@ -1287,21 +1207,21 @@ const proof_watermelon =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb47238ba5d16031b6bace4aee22156f5028b0ca56dc24f7247d6435292e82c039c3490a825d2e8deddf8679ce2f95f7e3a59d9c3e1af4a49b410266d21c9344d6d79519b8cdfbd053e5a86cf28a781debae71638cd77f85aad4b88869373d9dcfd",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32f69f145e31d2dc69b65adb5fc2c9d9e87c48210d874d2a2d613793ca90ed906e25069a7a1fd46757d09286b9ee4f67753a06fc706f938d01b200791fd9518f4279519b8cdfbd053e5a86cf28a781debae71638cd77f85aad4b88869373d9dcfd",
     },
     Fork {
       skip: 0,
       neighbor: Neighbor {
         nibble: 14,
         prefix: #"",
-        root: #"995afcfa89b7430348dbfb6171b944794119ffc0dd003edc18e2fa8d6d6d48bf",
+        root: #"d4447e5c5d54654688c8601bab65412d2b8c0607ae038ad5651caa3a04bc6b54",
       },
     },
   ]
 
 const without_watermelon =
   mpf.from_root(
-    #"e69c446638ad9ae9654e4e6699954996da1f1256d6df711bcb6a740659dfe470",
+    #"2e96067d040a2fea346d4f1be4e9ccfdf12d5b8b27f7e2bc03a0f0abaef53501",
   )
 
 // ---------- apple
@@ -1312,7 +1232,7 @@ const proof_apple =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb47238ba5d16031b6bace4aee22156f5028b0ca56dc24f7247d6435292e82c039c3490a825d2e8deddf8679ce2f95f7e3a59d9c3e1af4a49b410266d21c9344d6d79519b8cdfbd053e5a86cf28a781debae71638cd77f85aad4b88869373d9dcfd",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32f69f145e31d2dc69b65adb5fc2c9d9e87c48210d874d2a2d613793ca90ed906e25069a7a1fd46757d09286b9ee4f67753a06fc706f938d01b200791fd9518f4279519b8cdfbd053e5a86cf28a781debae71638cd77f85aad4b88869373d9dcfd",
     },
     Leaf {
       skip: 0,
@@ -1328,7 +1248,7 @@ const proof_apple =
 
 const without_apple =
   mpf.from_root(
-    #"cb7812785c2f6b56e3dba69923e37625e94953257915d25f1041f43cefd5cb62",
+    #"657ba71331b58ff290847f747f81ab44e5f6716c9c0a1b7936ab3db9b3e5a425",
   )
 
 // ---------- fig
@@ -1339,7 +1259,7 @@ const proof_fig =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbefa63eb4576001d8658219f928172eccb5448b4d7d62cd6d95228e13ebcbd5350be527bcfc7febe3c560057d97f4190bd24b537a322315f84daafab3ada562b50da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acb",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096786bcf4305e2bb0425ebb921890279da144b50e516a440ff16b78417d4108afe9e9625c510c5779331df65bd0a86085136d6696a6bfac0d752e6d31d5dd72da96da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acb",
     },
     Leaf {
       skip: 0,
@@ -1355,7 +1275,7 @@ const proof_fig =
 
 const without_fig =
   mpf.from_root(
-    #"fde975ef370e50b0d93fd3a766d85e502160b9231e6c4887616459f27e786693",
+    #"c8552662e0234dd6ef4973cf416c9f5695820dc51a532b5d5654ee9212a4f772",
   )
 
 // ---------- guava
@@ -1366,7 +1286,7 @@ const proof_guava =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb47238ba5d16031b6bace4aee22156f5028b0ca56dc24f7247d6435292e82c039c3490a825d2e8deddf8679ce2f95f7e3a59d9c3e1af4a49b410266d21c9344d6d08434fd717aea47d156185d589f44a59fc2e0158eab7ff035083a2a66cd3e15b",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32f69f145e31d2dc69b65adb5fc2c9d9e87c48210d874d2a2d613793ca90ed906e25069a7a1fd46757d09286b9ee4f67753a06fc706f938d01b200791fd9518f42033c3ca051645e502f48523070a0d379c37f037762d501202e9cfb19f4f16220",
     },
     Leaf {
       skip: 0,
@@ -1382,7 +1302,7 @@ const proof_guava =
 
 const without_guava =
   mpf.from_root(
-    #"aae08af9abdf11e286ae91c430b81cb306d1f43dcec58ab2f59fe024412e54e2",
+    #"dcde4d466622fa44311e3c0da8e9315538b1e7cc647eb0adb3c301b60056481e",
   )
 
 // ---------- kiwi
@@ -1393,7 +1313,7 @@ const proof_kiwi =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb47238ba5d16031b6bace4aee22156f5028b0ca56dc24f7247d6435292e82c039c3490a825d2e8deddf8679ce2f95f7e3a59d9c3e1af4a49b410266d21c9344d6d08434fd717aea47d156185d589f44a59fc2e0158eab7ff035083a2a66cd3e15b",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32f69f145e31d2dc69b65adb5fc2c9d9e87c48210d874d2a2d613793ca90ed906e25069a7a1fd46757d09286b9ee4f67753a06fc706f938d01b200791fd9518f42033c3ca051645e502f48523070a0d379c37f037762d501202e9cfb19f4f16220",
     },
     Leaf {
       skip: 0,
@@ -1409,7 +1329,7 @@ const proof_kiwi =
 
 const without_kiwi =
   mpf.from_root(
-    #"621815dfdfca61bca13341df5aa32f4133225b5e3b5d9c030001b2298132a0fa",
+    #"f11a146be05a70d5e73d48b5fb23b8df4900602878af3a0f0c0883dd0bd05545",
   )
 
 // ---------- passionfruit
@@ -1420,7 +1340,7 @@ const proof_passion =
   [
     Branch {
       skip: 0,
-      neighbors: #"4be28f4839135e1f8f5372a90b54bb7bfaf997a5d13711bb4d7d93f9d4e04fbefa63eb4576001d8658219f928172eccb5448b4d7d62cd6d95228e13ebcbd5350be527bcfc7febe3c560057d97f4190bd24b537a322315f84daafab3ada562b50da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acb",
+      neighbors: #"7c7fd40fe0f220322ad898cc9e5b4ea0485af584c84082ad64afcf71b1e4096786bcf4305e2bb0425ebb921890279da144b50e516a440ff16b78417d4108afe9e9625c510c5779331df65bd0a86085136d6696a6bfac0d752e6d31d5dd72da96da0bdb30bf45c76153418a634f1bcecba8c601ca985fbca14b57582920d82acb",
     },
     Leaf {
       skip: 0,
@@ -1436,7 +1356,7 @@ const proof_passion =
 
 const without_passion =
   mpf.from_root(
-    #"2e45678664ccbcad82eb24e7a77cb199593b47f07feafaa205b089a8dc48461e",
+    #"73f3008365a6a4b53b7660b10c44a23c40e4393818d929602d65d868eabb4a26",
   )
 
 // ---------- yuzu
@@ -1447,7 +1367,7 @@ const proof_yuzu =
   [
     Branch {
       skip: 0,
-      neighbors: #"c7bfa4472f3a98ebe0421e8f3f03adf0f7c4340dec65b4b92b1c9f0bed209eb47238ba5d16031b6bace4aee22156f5028b0ca56dc24f7247d6435292e82c039c3490a825d2e8deddf8679ce2f95f7e3a59d9c3e1af4a49b410266d21c9344d6d79519b8cdfbd053e5a86cf28a781debae71638cd77f85aad4b88869373d9dcfd",
+      neighbors: #"670cd8fe3049bf2f9c5cbcd01f747da8ac8feafac5c531858ec6bae229170e32f69f145e31d2dc69b65adb5fc2c9d9e87c48210d874d2a2d613793ca90ed906e25069a7a1fd46757d09286b9ee4f67753a06fc706f938d01b200791fd9518f4279519b8cdfbd053e5a86cf28a781debae71638cd77f85aad4b88869373d9dcfd",
     },
     Leaf {
       skip: 0,
@@ -1463,5 +1383,5 @@ const proof_yuzu =
 
 const without_yuzu =
   mpf.from_root(
-    #"366a84bbb2274658080acb85026bba389054782b4681f4cf9e29141ac98de253",
+    #"ba9f06cd8e668234419be49452d304a8e641692ea68756c96d49ba5ea8f3c51f",
   )

@@ -25,7 +25,7 @@ pub fn suffix(path, cursor) {
   } else {
     bytearray.drop(path, ( cursor + 1 ) / 2)
       |> bytearray.push(nibble(path, cursor))
-      |> bytearray.push(0)
+      |> bytearray.push(0x10)
   }
 }
 
